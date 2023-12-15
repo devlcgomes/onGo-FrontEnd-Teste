@@ -1,12 +1,10 @@
 "use client";
 import { useState } from "react";
-import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
 interface NavigationProps {
-    isOpen: boolean;
-    toggle: () => void
-    ;
+  isOpen: boolean;
+  toggle: () => void;
 }
 
 const Navigation = () => {
@@ -16,7 +14,6 @@ const Navigation = () => {
   };
   return (
     <>
-      <Sidebar />
       <Navbar />
     </>
   );

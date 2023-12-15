@@ -31,7 +31,7 @@ const Customer = () => {
       });
       fetchCustomers();
     } catch (error) {
-      console.log("Erro ao criar um novo cliente.");
+      alert("Insira o nome e um CPF Válido, incluindo pontos e hífen.");
     }
   };
 
@@ -39,9 +39,7 @@ const Customer = () => {
     try {
       const fetchedCustomers = await getCustomers();
       setCustomers(fetchedCustomers);
-    } catch (error) {
-      console.log("não foi possivel fazer o get;");
-    }
+    } catch (error) {}
   };
 
   const handleEditCustomer = (customer: CustomerType) => {
@@ -63,12 +61,9 @@ const Customer = () => {
           setIsEditModalOpen(false);
           setIsModalOpen(false);
         } else {
-          console.log("Propriedades inválidas do cliente para edição.");
         }
       }
-    } catch (error) {
-      console.log("Erro ao salvar as alterações do cliente.", error);
-    }
+    } catch (error) {}
   };
 
   const handleDeleteCustomer = (customer: CustomerType) => {
@@ -89,9 +84,8 @@ const Customer = () => {
   };
 
   useEffect(() => {
-    // Busque a lista de clientes quando o componente montar
     fetchCustomers();
-  }, []); // O array vazio assegura que o efeito só é executado uma vez, equivalente a componentDidMount
+  }, []);
 
   return (
     <>

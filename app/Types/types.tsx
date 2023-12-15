@@ -17,8 +17,11 @@ export interface CustomModalProps {
 }
 
 export interface Inventory {
-  id: string;
+  inventoryId: string;
   customerId: string;
-  productId: string;
-  // Adicione outras propriedades conforme necessário
+  customerName: string;
+  inventory: Array<{
+    id: string;
+    name: string;
+  }>;
 }

@@ -18,9 +18,7 @@ const CustomModal: React.FC<CustomModalProps> = (props) => {
     try {
       const fetchedCustomers = await getCustomers();
       setCustomers(fetchedCustomers);
-    } catch (error) {
-      console.log("não foi possivel fazer o get;");
-    }
+    } catch (error) {}
   };
 
   const handleCustomerChange = (
@@ -44,39 +42,30 @@ const CustomModal: React.FC<CustomModalProps> = (props) => {
 
   const handleSaveInventory = async () => {
     try {
-      // Verifique se há um cliente selecionado e se há produtos na lista
       if (selectedCustomer && selectedProducts.length > 0) {
-        // Extraia o ID do cliente selecionado
         const customerId = selectedCustomer as string;
 
-        // Extraia os IDs dos produtos da lista, excluindo produtos nulos ou indefinidos
         const productIds = selectedProducts
           .filter((product) => product && product.id)
           .map((product) => product.id as string);
 
-        // Chame a função do serviço para salvar o inventário
         await saveInventory(customerId, productIds);
 
-        // Limpe os dados após salvar o inventário (se necessário)
         setSelectedCustomer("");
         setSelectedProducts([]);
 
-        // Chame a função onSave passada pelos props para fechar o modal
         if (props.onSave) {
           props.onSave(customerId);
         }
 
-        // Aqui você pode adicionar lógica adicional, como exibir uma mensagem de sucesso
-        console.log("Inventário salvo com sucesso!");
+        alert("Inventário Salvo com sucesso");
       } else {
-        // Adicione lógica para lidar com o caso em que o cliente ou os produtos não foram selecionados
-        console.log(
+        alert(
           "Selecione um cliente e adicione produtos à lista antes de salvar o inventário."
         );
       }
     } catch (error) {
-      // Adicione lógica para lidar com erros durante o salvamento do inventário
-      console.error("Erro ao salvar o inventário:", error);
+      console.error(error);
     }
   };
 
@@ -112,7 +101,6 @@ const CustomModal: React.FC<CustomModalProps> = (props) => {
                   <p className="mt-2 text-gray-500">
                     O primeiro passo é selecionar qual o Cliente terá os items
                   </p>
-                  {/* Add the select element for choosing a customer */}
                   <div className="mt-3">
                     <label
                       htmlFor="customerSelect"
@@ -195,7 +183,6 @@ const CustomModal: React.FC<CustomModalProps> = (props) => {
                 Cancelar
               </button>
             </div>
-            {/* Mostrar os itens selecionados */}
           </div>
         </div>
       </div>

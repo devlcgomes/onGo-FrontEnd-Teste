@@ -6,66 +6,50 @@ import { getCustomers } from "../Services/customerService";
 import { CustomModalProps } from "@/app/Types/types";
 import { getProducts } from "../Services/productService";
 import { Product } from "@/app/Types/types";
-import { getInventories, saveInventory } from "@/app/Services/inventoryService";
-import { Inventory } from "@/app/Types/types";
+import { getInventories } from "@/app/Services/inventoryService";
+import { Inventory as InventoryType } from "@/app/Types/types";
 
 const Inventory = () => {
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [inventories, setInventories] = useState<Inventory[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
+  const [selectedCustomerInventory, setSelectedCustomerInventory] = useState<{
+    customerId: string;
+    inventory: { id: string; name: string }[];
+  } | null>(null);
 
-  useEffect(() => {
-    const fetchInventories = async () => {
-      try {
-        // Aqui, você precisa obter o customerId de alguma forma
-        const customerId = "c9a12995-19ee-49e8-a64e-08ed1983b9c0";
-        const fetchedInventories = await getInventories(customerId);
-        setInventories(fetchedInventories);
-      } catch (error) {
-        console.error("Erro ao buscar inventários:", error);
-      }
-    };
-
-    fetchInventories();
-  }, []);
-
-  const openCustomModal = (): Promise<string | null> => {
-    // Implemente a lógica do seu modal aqui
-    // Pode ser um formulário, uma caixa de diálogo, etc.
-    // Por enquanto, vou apenas retornar um valor fixo para fins de exemplo
-    return new Promise((resolve) => {
-      const customerId = "c9a12995-19ee-49e8-a64e-08ed1983b9c0";
-      resolve(customerId);
-    });
-  };
-
-  const handleOpenAddItemModal = async () => {
+  const handleCheckInventory = async () => {
     try {
-      // Abra o modal e aguarde o customerId
-      const customerId = await openCustomModal();
+      if (!selectedCustomerId) {
+        alert("ID do cliente não fornecido");
+        return;
+      }
 
-      if (customerId) {
-        const existingInventories = await getInventories(customerId);
+      const existingInventories = await getInventories(selectedCustomerId);
 
-        if (existingInventories.length > 0) {
-          // Cliente já possui inventário
-          console.log("Cliente já possui inventário:", existingInventories);
-        } else {
-          // Cliente não possui inventário, então abra o modal de adicionar item
-          setIsAddItemModalOpen(true);
-        }
+      if (existingInventories.length > 0) {
+        const selectedInventory = existingInventories[0];
+        setSelectedCustomerInventory({
+          customerId: selectedInventory.customerId,
+          inventory: selectedInventory.inventory,
+        });
       } else {
-        // O usuário cancelou ou ocorreu algum erro ao obter o customerId
-        console.log("Operação cancelada ou erro ao obter o customerId");
+        setSelectedCustomerInventory(null);
+        alert("O Cliente informado não possui inventário.");
       }
     } catch (error) {
-      console.error("Erro ao verificar inventário do cliente:", error);
+      alert("O Cliente informado não possui inventário.");
     }
   };
 
+  const handleOpenAddItemModal = () => {
+    setIsAddItemModalOpen(true);
+  };
+
   const handleCloseAddItemModal = () => {
-    // Lógica para fechar o modal de adicionar item
     setIsAddItemModalOpen(false);
   };
 
@@ -74,7 +58,7 @@ const Inventory = () => {
       const fetchedCustomers = await getCustomers();
       setCustomers(fetchedCustomers);
     } catch (error) {
-      console.log("não foi possível fazer o get;", error);
+      console.log("Não foi possível obter a lista de clientes;");
     }
   };
 
@@ -83,42 +67,15 @@ const Inventory = () => {
       const fetchedProducts = await getProducts();
       setProducts(fetchedProducts);
     } catch (error) {
-      console.log("Não foi possível fazer o get de produtos.", error);
-    }
-  };
-
-  const handleSaveInventory = async () => {
-    try {
-      // Lógica para lidar com o salvamento do inventário
-      // Aqui você deve obter os produtos selecionados, customerId, etc.
-      const customerId = "c9a12995-19ee-49e8-a64e-08ed1983b9c0"; // Substitua pelo valor correto
-
-      // Supondo que você tenha os IDs dos produtos selecionados em um array chamado selectedProductIds
-      const selectedProductIds: string[] = [];
-
-      // Chame a função do serviço para salvar o inventário
-      await saveInventory(customerId, selectedProductIds);
-
-      // Atualize a lista de inventários após o salvamento, se necessário
-      const updatedInventories = await getInventories(customerId);
-      setInventories(updatedInventories);
-
-      // Feche o modal
-      handleCloseAddItemModal();
-
-      console.log("Inventário salvo com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar o inventário:", error);
+      console.log("Não foi possível obter a lista de produtos.");
     }
   };
 
   useEffect(() => {
-    // Busque a lista de clientes quando o componente montar
     fetchCustomers();
     fetchProducts();
-  }, []); // O array vazio assegura que o efeito só é executado uma vez, equivalente a componentDidMount
+  }, []);
 
-  console.log(inventories);
   return (
     <>
       <div className="w-full bg-green-600 block">
@@ -137,25 +94,73 @@ const Inventory = () => {
         </div>
       </div>
 
-      {/* Seu modal de adicionar item aqui */}
+      {/* Modal Add Items */}
       {isAddItemModalOpen && (
         <CustomModal
-          onSave={handleSaveInventory}
+          onSave={(customerId) => {
+            setSelectedCustomerId(customerId);
+            handleCloseAddItemModal();
+          }}
           onCancel={handleCloseAddItemModal}
         />
       )}
 
-      <div>
-        <h2>Inventários</h2>
-        <ul>
-          {inventories.map((inventory) => (
-            <li key={inventory.id}>
-              <strong>Cliente ID:</strong> {inventory.customerId},{" "}
-              <strong>Produto ID:</strong> {inventory.productId}
-            </li>
-          ))}
-        </ul>
+      <div className="container mx-auto py-4">
+        <h1>
+          Selecione abaixo o nome do Cliente e em seguida clique em buscar para
+          ver seus itens
+        </h1>
+        <div className="flex items-center py-4">
+          <select
+            value={selectedCustomerId || ""}
+            onChange={(e) => setSelectedCustomerId(e.target.value)}
+            className="bg-gray-200 text-gray-800 p-2 rounded mr-2"
+          >
+            <option value="" disabled>
+              Selecione um cliente
+            </option>
+            {customers.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleCheckInventory}
+            className="bg-textDarkGreen text-white px-4 py-2 rounded"
+          >
+            Buscar
+          </button>
+        </div>
       </div>
+
+      {/* Mostrar os itens do cliente */}
+      {selectedCustomerInventory && (
+        <div className="container mx-auto py-4">
+          <h2 className="text-2xl font-bold mb-4">Itens do Cliente</h2>
+          <div className="bg-gray-100 p-4 rounded-md mb-4">
+            <p>
+              <span className="font-bold">Nome do Cliente:</span>{" "}
+              {
+                customers.find(
+                  (customer) =>
+                    customer.id === selectedCustomerInventory.customerId
+                )?.name
+              }
+            </p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-md p-4">
+            <h3 className="text-lg font-bold mb-4">Itens</h3>
+            <ul className="list-disc pl-4">
+              {selectedCustomerInventory.inventory.map((item) => (
+                <li key={item.id} className="mb-2">
+                  {item.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -20,9 +20,7 @@ const Product = () => {
     try {
       const fetchedProducts = await getProducts();
       setProducts(fetchedProducts);
-    } catch (error) {
-      console.log("Não foi possível fazer o get de produtos.");
-    }
+    } catch (error) {}
   };
 
   const handleCreateNewProduct = async () => {
@@ -37,9 +35,7 @@ const Product = () => {
       });
 
       fetchProducts();
-    } catch (error) {
-      console.log("Erro ao criar um novo produto:", error);
-    }
+    } catch (error) {}
   };
 
   const handleEditProduct = (product: Product) => {
@@ -56,12 +52,11 @@ const Product = () => {
     try {
       if (editingProduct) {
         await editProduct(editingProduct);
-        // Após editar o produto, atualiza a lista de produtos e fecha o modal
         fetchProducts();
         setIsModalOpen(false);
       }
     } catch (error) {
-      console.log("Erro ao salvar as alterações do produto.");
+      console.log(error);
     }
   };
 
@@ -73,12 +68,11 @@ const Product = () => {
         setIsDeleteModalOpen(false);
       }
     } catch (error) {
-      console.log("Erro ao excluir o produto:", error);
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    // Busque a lista de produtos quando o componente montar
     fetchProducts();
   }, []);
 
@@ -279,8 +273,6 @@ const Product = () => {
           </div>
         </div>
       )}
-
-      {/* ... (código existente) */}
     </>
   );
 };
